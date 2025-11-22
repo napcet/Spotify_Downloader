@@ -1,0 +1,36 @@
+# Spotify API
+spotipy==2.24.0
+
+# YouTube downloading
+yt-dlp==2024.10.7
+
+# Audio processing
+mutagen==1.47.0
+pydub==0.25.1
+pyaudioop-lts  # Required for pydub on Python 3.13+
+
+# Image processing (for album artwork)
+Pillow==10.4.0
+
+# HTTP requests
+requests==2.32.3
+
+# Configuration
+PyYAML==6.0.2
+
+# CLI
+click==8.1.7
+colorama==0.4.6
+
+# Progress bars
+tqdm==4.66.5
+
+# Utils
+python-dotenv==1.0.1
+
+# Cryptography (for Deezer)
+pycryptodome==3.20.0
+
+# Optional: For Deezer FLAC downloads (install manually if needed)
+# deemix can be installed via: pip install git+https://gitlab.com/RemixDev/deemix-py.git
+# deezer-py can be installed via: pip install deezer-py
