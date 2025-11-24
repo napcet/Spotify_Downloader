@@ -22,7 +22,7 @@ if requirements_file.exists():
 
 setup(
     name="spotify-downloader",
-    version="1.0.1",
+    version="1.0.2",
     author="Mokshit Bindal",
     author_email="your-email@example.com",
     description="Download Spotify playlists, albums, and tracks in FLAC/MP3 format from free sources",

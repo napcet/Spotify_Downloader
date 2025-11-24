@@ -1,7 +1,7 @@
 # Maintainer: Mokshit Bindal <your-email@example.com>
 
 pkgname=spotify-downloader
-pkgver=1.0.1
+pkgver=1.0.2
 pkgrel=1
 pkgdesc="Download Spotify playlists, albums, and tracks in FLAC/MP3 format from free sources with beautiful terminal UI"
 arch=('any')
