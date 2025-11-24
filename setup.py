@@ -28,7 +28,7 @@ setup(
     description="Download Spotify playlists, albums, and tracks in FLAC/MP3 format from free sources",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/MokshitBindal/spotify-downloader",
+    url="https://github.com/MokshitBindal/Spotify_Downloader",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -53,8 +53,8 @@ setup(
     },
     include_package_data=True,
     project_urls={
-        "Bug Reports": "https://github.com/MokshitBindal/spotify-downloader/issues",
-        "Source": "https://github.com/MokshitBindal/spotify-downloader",
-        "Documentation": "https://github.com/MokshitBindal/spotify-downloader#readme",
+        "Bug Reports": "https://github.com/MokshitBindal/Spotify_Downloader/issues",
+        "Source": "https://github.com/MokshitBindal/Spotify_Downloader",
+        "Documentation": "https://github.com/MokshitBindal/Spotify_Downloader#readme",
     },
 )

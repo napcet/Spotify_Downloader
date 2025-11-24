@@ -48,10 +48,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MokshitBindal/spotify-downloader"
-Documentation = "https://github.com/MokshitBindal/spotify-downloader#readme"
-Repository = "https://github.com/MokshitBindal/spotify-downloader"
-"Bug Tracker" = "https://github.com/MokshitBindal/spotify-downloader/issues"
+Homepage = "https://github.com/MokshitBindal/Spotify_Downloader"
+Documentation = "https://github.com/MokshitBindal/Spotify_Downloader#readme"
+Repository = "https://github.com/MokshitBindal/Spotify_Downloader"
+"Bug Tracker" = "https://github.com/MokshitBindal/Spotify_Downloader/issues"
 
 [project.scripts]
 spotify-downloader = "main:main"
