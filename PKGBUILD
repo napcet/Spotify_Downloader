@@ -1,10 +1,10 @@
 # Maintainer: Mokshit Bindal <your-email@example.com>
 
 pkgname=spotify-downloader
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
-pkgdesc="Download Spotify playlists, albums, and tracks in FLAC/MP3 format from free sources"
-arch=('x86_64')
+pkgdesc="Download Spotify playlists, albums, and tracks in FLAC/MP3 format from free sources with beautiful terminal UI"
+arch=('any')
 url="https://github.com/MokshitBindal/Spotify_Downloader"
 license=('MIT')
 depends=('python' 'python-pip' 'ffmpeg')
