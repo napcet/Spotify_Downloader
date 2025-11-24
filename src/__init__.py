@@ -12,17 +12,10 @@ from .youtube_search import YouTubeSearcher
 from .metadata import MetadataEmbedder
 from .utils import load_config, setup_logging
 
-# Optional imports
-try:
-    from .converter import AudioConverter
-except ImportError:
-    AudioConverter = None
-
 __all__ = [
     'SpotifyClient',
     'Downloader',
     'YouTubeSearcher',
-    'AudioConverter',
     'MetadataEmbedder',
     'load_config',
     'setup_logging'

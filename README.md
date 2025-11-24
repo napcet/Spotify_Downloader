@@ -120,19 +120,23 @@ python main.py --playlist https://open.spotify.com/playlist/xxxxx --output ~/Mus
 
 ```
 Spotify_Downloader/
-├── main.py                 # Entry point
-├── requirements.txt        # Dependencies
-├── config/
-│   └── config.yaml        # Configuration file
+├── main.py                          # Entry point with CLI
+├── requirements.txt                 # Dependencies
 ├── src/
 │   ├── __init__.py
-│   ├── spotify_client.py  # Spotify API integration
-│   ├── downloader.py      # Download logic
-│   ├── youtube_search.py  # YouTube search
-│   ├── converter.py       # Audio format conversion
-│   ├── metadata.py        # Metadata tagging
-│   └── utils.py           # Utility functions
-└── downloads/             # Downloaded songs (created automatically)
+│   ├── spotify_client.py           # Spotify API client
+│   ├── multi_source_downloader.py  # Multi-source download manager
+│   ├── internetarchive_client.py   # Internet Archive downloads
+│   ├── jamendo_client.py           # Jamendo API client
+│   ├── deemix_client.py            # Deezer client
+│   ├── downloader.py               # YouTube downloader
+│   ├── youtube_search.py           # YouTube search
+│   ├── metadata.py                 # Metadata embedding
+│   ├── progress_display.py         # Terminal UI
+│   ├── user_config.py              # User preferences
+│   ├── download_tracker.py         # Track completed downloads
+│   └── utils.py                    # Utility functions
+└── downloads/                      # Downloaded songs (auto-created)
 ```
 
 ## How It Works
