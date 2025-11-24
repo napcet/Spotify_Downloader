@@ -1,6 +1,6 @@
 # Spotify Music Downloader
 
-Download music from Spotify playlists with beautiful terminal UI and smart retry features.
+Download music from Spotify locally, Either song or playlists with beautiful terminal UI and smart retry features.
 
 ## ✨ Features
 

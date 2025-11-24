@@ -1,7 +1,7 @@
 pkgbase = spotify-downloader
 	pkgdesc = Download Spotify playlists, albums, and tracks in FLAC/MP3 format from free sources with beautiful terminal UI
-	pkgver = 1.0.1
-	pkgrel = 1
+	pkgver = 1.0.2
+	pkgrel = 2
 	url = https://github.com/MokshitBindal/Spotify_Downloader
 	arch = any
 	license = MIT
@@ -12,9 +12,8 @@ pkgbase = spotify-downloader
 	depends = python
 	depends = python-pip
 	depends = ffmpeg
-	optdepends = yt-dlp: YouTube download support
-	optdepends = python-spotipy: Spotify API access
-	source = spotify-downloader-1.0.1.tar.gz::https://github.com/MokshitBindal/Spotify_Downloader/archive/v1.0.1.tar.gz
-	sha256sums = 92fc99206458eb64c5da4bb4a2fcad802dca532889640b0319cebe208a0ee782
+	depends = yt-dlp
+	source = spotify-downloader-1.0.2.tar.gz::https://github.com/MokshitBindal/Spotify_Downloader/archive/v1.0.2.tar.gz
+	sha256sums = bbbbf9633a607543e45494af2469495895a262925bda2f31150a2f3028d6c8df
 
 pkgname = spotify-downloader
