@@ -33,6 +33,7 @@ logger = logging.getLogger('spotify_downloader')
 @click.option('--track', '-t', help='Spotify track URL')
 @click.option('--album', '-a', help='Spotify album URL')
 @click.option('--song', '-s', help='Search and download by song name (e.g., "Eminem - Beautiful Pain")')
+@click.option('--list-albuns', is_flag=True, help='Process albums from albuns.txt file sequentially')
 @click.option('--retry-failed', is_flag=True, help='Retry previously failed downloads')
 @click.option('--format', '-f', default=None, help='Audio format (mp3, flac, wav, m4a)')
 @click.option('--quality', '-q', default=None, help='Audio quality for MP3 (128, 192, 256, 320)')
@@ -44,7 +45,7 @@ logger = logging.getLogger('spotify_downloader')
 @click.option('--set-download-folder', help='Set default download folder')
 @click.option('--show-preferences', is_flag=True, help='Show current user preferences')
 @click.option('--reset-preferences', is_flag=True, help='Reset all user preferences')
-def main(playlist, track, album, song, retry_failed, format, quality, output, concurrent, no_metadata, no_artwork, config, set_download_folder, show_preferences, reset_preferences):
+def main(playlist, track, album, song, list_albuns, retry_failed, format, quality, output, concurrent, no_metadata, no_artwork, config, set_download_folder, show_preferences, reset_preferences):
     """
     Spotify Music Downloader - Download playlists, albums, or tracks from Spotify.
     
@@ -60,6 +61,10 @@ def main(playlist, track, album, song, retry_failed, format, quality, output, co
         \b
         # Download by song name
         python main.py --song "Eminem - Beautiful Pain"
+        
+        \b
+        # Process albums from albuns.txt sequentially
+        python main.py --list-albuns
         
         \b
         # Retry failed downloads
@@ -163,6 +168,11 @@ def main(playlist, track, album, song, retry_failed, format, quality, output, co
     # Handle retry failed
     if retry_failed:
         retry_failed_downloads(cfg)
+        return
+    
+    # Handle album list processing
+    if list_albuns:
+        process_album_list(cfg)
         return
     
     # Handle song name search
@@ -545,6 +555,124 @@ def download_by_song_name(song_query: str, config: dict):
     except Exception as e:
         click.echo(f"❌ Error: {e}")
         logger.exception("Song search error")
+
+
+def process_album_list(config: dict, albuns_file: str = 'albuns.txt'):
+    """
+    Process albums from a text file sequentially.
+    Each album is processed one by one, and the file is updated after each completion.
+    
+    Args:
+        config: Configuration dictionary
+        albuns_file: Path to the file containing album URLs (default: albuns.txt)
+    """
+    import subprocess
+    import sys
+    
+    albuns_path = Path(albuns_file)
+    
+    if not albuns_path.exists():
+        click.echo(f"❌ File not found: {albuns_file}")
+        click.echo("   Create a file with one Spotify album URL per line")
+        return
+    
+    # Read all lines from the file
+    with open(albuns_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    
+    # Find pending albums (lines that don't start with [CONCLUÍDO] and are valid URLs)
+    pending_albums = []
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        # Skip empty lines, comments, completed albums, and error messages
+        if not stripped:
+            continue
+        if stripped.startswith('#'):
+            continue
+        if stripped.startswith('[CONCLUÍDO]'):
+            continue
+        if stripped.startswith('[ERRO:'):
+            continue
+        if 'open.spotify.com/album/' in stripped:
+            pending_albums.append((i, stripped))
+    
+    if not pending_albums:
+        click.echo("✅ All albums have been processed!")
+        click.echo(f"   Check {albuns_file} for details")
+        return
+    
+    total = len(pending_albums)
+    click.echo(f"\n📀 Found {total} pending album(s) to process\n")
+    
+    # Process each album one by one
+    for idx, (line_index, album_url) in enumerate(pending_albums, 1):
+        click.echo("=" * 70)
+        click.echo(f"📀 Processing album {idx}/{total}")
+        click.echo(f"🔗 {album_url}")
+        click.echo("=" * 70 + "\n")
+        
+        try:
+            # Run the album download command
+            result = subprocess.run(
+                [sys.executable, 'main.py', '--album', album_url],
+                capture_output=False,
+                text=True
+            )
+            
+            if result.returncode == 0:
+                # Mark as completed
+                lines[line_index] = f"[CONCLUÍDO] {album_url}\n"
+                click.echo(f"\n✅ Album {idx}/{total} completed successfully!\n")
+            else:
+                # Mark as error
+                error_msg = f"Exit code: {result.returncode}"
+                lines[line_index] = f"{album_url}\n"
+                # Insert error message after the album URL
+                error_line = f"[ERRO: {error_msg}]\n"
+                lines.insert(line_index + 1, error_line)
+                click.echo(f"\n❌ Album {idx}/{total} failed: {error_msg}\n")
+        
+        except KeyboardInterrupt:
+            click.echo("\n\n⚠️  Processing interrupted by user")
+            click.echo("   Progress has been saved. Run --list-albuns again to continue.")
+            # Save current progress before exiting
+            with open(albuns_path, 'w', encoding='utf-8') as f:
+                f.writelines(lines)
+            return
+        
+        except Exception as e:
+            # Mark as error with exception message
+            error_msg = str(e).replace('\n', ' ')[:100]  # Limit error message length
+            lines[line_index] = f"{album_url}\n"
+            error_line = f"[ERRO: {error_msg}]\n"
+            lines.insert(line_index + 1, error_line)
+            click.echo(f"\n❌ Album {idx}/{total} failed: {error_msg}\n")
+        
+        # Save progress after each album (re-read to handle inserted lines)
+        with open(albuns_path, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+        
+        # Re-read the file to get updated line positions
+        with open(albuns_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    
+    # Final summary
+    click.echo("\n" + "=" * 70)
+    click.echo("📊 SUMMARY")
+    click.echo("=" * 70)
+    
+    # Count results
+    completed = sum(1 for line in lines if line.strip().startswith('[CONCLUÍDO]'))
+    errors = sum(1 for line in lines if line.strip().startswith('[ERRO:'))
+    
+    click.echo(f"   ✅ Completed: {completed}")
+    click.echo(f"   ❌ Errors: {errors}")
+    click.echo(f"\n   Results saved to: {albuns_file}")
+    
+    if errors > 0:
+        click.echo("\n   💡 Tip: Use --album <url> to retry individual albums")
+    
+    click.echo("=" * 70 + "\n")
 
 
 def retry_failed_downloads(config: dict):

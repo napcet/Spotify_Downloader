@@ -1,3 +1,9 @@
+# Arquivos de teste
+albuns.txt
+
+# arquivos de github
+.github/*.md
+
 # Python
 __pycache__/
 *.py[cod]
@@ -20,10 +26,16 @@ wheels/
 *.egg
 MANIFEST
 
+# MCP-related local files/configs
+mcp/
+*.mcp
+*.mcp.json
+
 # Virtual Environment
 venv/
 env/
 ENV/
+.venv
 
 # IDEs
 .vscode/
