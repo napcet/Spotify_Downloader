@@ -6,6 +6,10 @@ Setup script for Spotify Downloader
 from setuptools import setup, find_packages
 from pathlib import Path
 
+# Read the VERSION file
+version_file = Path(__file__).parent / "VERSION"
+version = version_file.read_text().strip() if version_file.exists() else "1.0.1"
+
 # Read the README file
 readme_file = Path(__file__).parent / "README.md"
 long_description = readme_file.read_text() if readme_file.exists() else ""
@@ -22,7 +26,7 @@ if requirements_file.exists():
 
 setup(
     name="spotify-downloader",
-    version="1.0.3",
+    version=version,
     author="Mokshit Bindal",
     author_email="your-email@example.com",
     description="Download Spotify playlists, albums, and tracks in FLAC/MP3 format from free sources",

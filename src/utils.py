@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Dict, Optional
 from dotenv import load_dotenv
 import sys
+from .__version__ import __version__, VERSION_BANNER
 
 
 def load_config(config_path: str = 'config/config.yaml') -> Dict:
@@ -227,15 +228,7 @@ def check_ffmpeg() -> bool:
 
 def print_banner():
     """Print application banner."""
-    banner = """
-    ╔═══════════════════════════════════════════════════════╗
-    ║                                                       ║
-    ║        Spotify Music Downloader v1.0.0                ║
-    ║        Download playlists in various formats         ║
-    ║                                                       ║
-    ╚═══════════════════════════════════════════════════════╝
-    """
-    print(banner)
+    print(VERSION_BANNER)
 
 
 class ProgressTracker:

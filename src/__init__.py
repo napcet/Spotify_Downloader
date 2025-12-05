@@ -3,8 +3,15 @@ Spotify Music Downloader
 A tool to download songs from Spotify playlists in various formats.
 """
 
-__version__ = "1.0.0"
-__author__ = "Your Name"
+from .__version__ import (
+    __version__,
+    __version_info__,
+    __title__,
+    __description__,
+    __author__,
+    __license__,
+    __url__
+)
 
 from .spotify_client import SpotifyClient
 from .downloader import Downloader
