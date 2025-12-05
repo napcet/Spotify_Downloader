@@ -21,11 +21,11 @@ __license__ = "MIT"
 __url__ = "https://github.com/MokshitBindal/Spotify_Downloader"
 
 # Version banner
+_title_line = f"{__title__} v{__version__}"
+_desc_line = "Download playlists in various formats"
 VERSION_BANNER = f"""
 ╔═══════════════════════════════════════════════════════╗
-║                                                       ║
-║        {__title__} v{__version__:<18}                 ║
-║        Download playlists in various formats          ║
-║                                                       ║
+║{_title_line:^55}║
+║{_desc_line:^55}║
 ╚═══════════════════════════════════════════════════════╝
 """
