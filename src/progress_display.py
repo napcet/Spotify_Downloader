@@ -1,31 +1,47 @@
 """
-Enhanced Progress Display
-Beautiful terminal output similar to pacman downloader.
+Enhanced Progress Display using Rich
+Beautiful terminal output with progress bars and live updates.
 """
 
-import sys
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeRemainingColumn, TaskProgressColumn
+from rich.table import Table
+from rich.panel import Panel
 from typing import Optional
-from datetime import datetime
 import time
 
 
 class ProgressDisplay:
-    """Enhanced progress display for terminal."""
+    """Enhanced progress display using Rich library."""
     
     def __init__(self, total_tracks: int = 0):
+        self.console = Console()
         self.start_time = time.time()
-        self.current_track = ""
         self.total_tracks = total_tracks
         self.completed = 0
         self.failed = 0
         self.skipped = 0
-        self.failed_tracks = []  # Track failed song names
+        self.failed_tracks = []
+        
+        # Create progress bar
+        self.progress = Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(bar_width=40),
+            TaskProgressColumn(),
+            console=self.console
+        )
+        
+        self.main_task = None
         
     def print_header(self):
         """Print a beautiful header."""
-        print("\n" + "=" * 70)
-        print("  🎵  SPOTIFY MUSIC DOWNLOADER")
-        print("=" * 70 + "\n")
+        self.console.print()
+        self.console.print(Panel.fit(
+            "[bold cyan]🎵  SPOTIFY MUSIC DOWNLOADER[/bold cyan]",
+            border_style="cyan"
+        ))
+        self.console.print()
     
     def print_source_info(self, sources: list):
         """Print available download sources."""
@@ -47,81 +63,85 @@ class ProgressDisplay:
             'bandcamp': 'BANDCAMP'
         }
         
-        print("📡 Available Sources:")
+        table = Table(title="📡 Available Sources", show_header=False, box=None)
+        
         for i, source in enumerate(sources):
             icon = source_icons.get(source, '🔊')
             label = source_labels.get(source, source.upper())
-            status = "✓ PRIMARY" if i == 0 else "✓ FALLBACK"
-            print(f"   {icon}  {label:<30} {status}")
-        print()
+            status = "[green]✓ PRIMARY[/green]" if i == 0 else "[blue]✓ FALLBACK[/blue]"
+            table.add_row(f"{icon}  {label}", status)
+        
+        self.console.print(table)
+        self.console.print()
+    
+    def start_progress(self):
+        """Start the progress bar."""
+        self.progress.start()
+        self.main_task = self.progress.add_task(
+            "[cyan]Downloading tracks...",
+            total=self.total_tracks
+        )
+    
+    def stop_progress(self):
+        """Stop the progress bar."""
+        if self.progress:
+            self.progress.stop()
     
     def print_track_info(self, track_num: int, total: int, track: dict):
-        """Print current track being processed - updates in place."""
-        elapsed = time.time() - self.start_time
-        rate = self.completed / elapsed if elapsed > 0 and self.completed > 0 else 0
-        eta = (total - self.completed) / rate if rate > 0 else 0
-        
-        # Save cursor position, clear from cursor to end of screen
-        sys.stdout.write('\033[s\033[J')
-        
-        # Track info - shown above progress bar
+        """Print current track being processed."""
         artist = track['artist'][:40]
         title = track['name'][:50]
-        print(f"🎵 Downloading: {artist} - {title}")
         
-        # Progress bar - fixed position
-        print(f"[{track_num:3d}/{total}] ", end='')
-        print(f"{'█' * int((track_num/total) * 20)}", end='')
-        print(f"{'░' * (20 - int((track_num/total) * 20))} ", end='')
-        print(f"{(track_num/total)*100:5.1f}%", end='')
+        # Update progress description with stats
+        stats = f"│ [green]✓ {self.completed}[/green] │ [red]✗ {self.failed}[/red] │ [yellow]⊙ {self.skipped}[/yellow]"
         
-        print(f" │ ✓ {self.completed} │ ✗ {self.failed} │ ⊙ {self.skipped} ", end='')
-        print(f"│ ⏱ {self._format_time(int(eta))}")
-        
-        # Restore cursor position
-        sys.stdout.write('\033[u')
-        sys.stdout.flush()
+        # Update progress description
+        if self.main_task is not None:
+            self.progress.update(
+                self.main_task,
+                description=f"[cyan]🎵 {artist} - {title} {stats}"
+            )
     
     def print_download_progress(self, source: str, percent: float, speed: str, eta: str):
-        """Print download progress bar."""
-        bar_length = 40
-        filled = int(bar_length * percent / 100)
-        bar = '█' * filled + '░' * (bar_length - filled)
+        """Print download progress bar (legacy compatibility - not used with Rich)."""
+        pass
+    
+    def print_success(self, track_name: str, file_size: float, source: str):
+        """Print success message."""
+        self.completed += 1
         
         source_icons = {
             'internetarchive': '📚',
             'jamendo': '🎹',
             'deezer': '🎼',
-            'youtube': '📺',
-            'soundcloud': '☁️',
-            'bandcamp': '🎸'
+            'youtube': '📺'
         }
-        source_icon = source_icons.get(source, '🔊')
-        
-        print(f"   {source_icon} [{bar}] {percent:5.1f}% │ {speed:>10} │ ETA: {eta}", end='\r')
-    
-    def print_success(self, track_name: str, file_size: float, source: str):
-        """Print success message - appears above progress bar."""
-        self.completed += 1
-        # Move to saved position, go up 2 lines, print result
-        sys.stdout.write('\033[u\033[2A')
-        source_icons = {'internetarchive': '📚', 'jamendo': '🎹', 'deezer': '🎼', 'youtube': '📺'}
         icon = source_icons.get(source, '🔊')
-        print(f"{icon} ✓ {track_name[:55]:<55} [{file_size:.1f}MB]")
-        # Move back to progress position
-        sys.stdout.write('\033[2B')
-        sys.stdout.flush()
+        
+        # Log above progress bar
+        self.console.print(f"{icon} [green]✓[/green] {track_name[:60]} [dim][{file_size:.1f}MB][/dim]")
+        
+        # Update progress
+        if self.main_task is not None:
+            self.progress.update(
+                self.main_task,
+                advance=1
+            )
     
     def print_skip(self, track_name: str, file_size: float):
-        """Print skip message - appears above progress bar."""
+        """Print skip message."""
         self.skipped += 1
-        sys.stdout.write('\033[u\033[2A')
-        print(f"⊙ {track_name[:60]} (exists)")
-        sys.stdout.write('\033[2B')
-        sys.stdout.flush()
+        
+        self.console.print(f"[yellow]⊙[/yellow] {track_name[:60]} [dim](exists)[/dim]")
+        
+        if self.main_task is not None:
+            self.progress.update(
+                self.main_task,
+                advance=1
+            )
     
     def print_error(self, track_name: str, error: str, track_info: dict = None):
-        """Print error message - appears above progress bar."""
+        """Print error message."""
         self.failed += 1
         
         # Store detailed info for retry functionality
@@ -132,51 +152,52 @@ class ProgressDisplay:
                 'url': track_info.get('spotify_url')
             })
         else:
-            # Fallback if no track info provided
             self.failed_tracks.append({'name': track_name})
         
-        sys.stdout.write('\033[u\033[2A')
-        print(f"✗ {track_name[:60]} (failed)")
-        sys.stdout.write('\033[2B')
-        sys.stdout.flush()
+        self.console.print(f"[red]✗[/red] {track_name[:60]} [dim](failed)[/dim]")
+        
+        if self.main_task is not None:
+            self.progress.update(
+                self.main_task,
+                advance=1
+            )
     
     def print_retry(self, attempt: int, max_attempts: int, source: str):
         """Print retry message."""
-        print(f"   ⟳ Retry {attempt}/{max_attempts} via {source.upper()}...", end='')
-        sys.stdout.flush()
+        self.console.print(f"   [yellow]⟳ Retry {attempt}/{max_attempts} via {source.upper()}...[/yellow]")
     
     def print_summary(self, elapsed: float):
         """Print final summary."""
-        print("\n" + "=" * 70)
-        print("  📊 DOWNLOAD SUMMARY")
-        print("=" * 70)
+        self.console.print()
         
         total = self.completed + self.failed + self.skipped
         success_rate = (self.completed / total * 100) if total > 0 else 0
         
-        print(f"\n  ✓ Completed:  {self.completed:3d}")
-        print(f"  ✗ Failed:     {self.failed:3d}")
-        print(f"  ⊙ Skipped:    {self.skipped:3d}")
-        print(f"  ━━━━━━━━━━━━━━━━━")
-        print(f"  ∑ Total:      {total:3d}")
-        print(f"\n  Success Rate: {success_rate:.1f}%")
-        print(f"  Time Elapsed: {self._format_time(elapsed)}")
+        # Create summary table
+        summary_table = Table(title="📊 DOWNLOAD SUMMARY", show_header=False, box=None)
+        summary_table.add_row("[green]✓ Completed:[/green]", f"{self.completed:3d}")
+        summary_table.add_row("[red]✗ Failed:[/red]", f"{self.failed:3d}")
+        summary_table.add_row("[yellow]⊙ Skipped:[/yellow]", f"{self.skipped:3d}")
+        summary_table.add_row("━━━━━━━━━━━━━━━━━", "")
+        summary_table.add_row("[bold]∑ Total:[/bold]", f"{total:3d}")
+        summary_table.add_row("", "")
+        summary_table.add_row("[bold]Success Rate:[/bold]", f"{success_rate:.1f}%")
+        summary_table.add_row("[bold]Time Elapsed:[/bold]", self._format_time(elapsed))
         
         if self.completed > 0:
             avg_time = elapsed / self.completed
-            print(f"  Avg per song: {avg_time:.1f}s")
+            summary_table.add_row("[bold]Avg per song:[/bold]", f"{avg_time:.1f}s")
         
-        print("\n" + "=" * 70)
+        self.console.print(Panel(summary_table, border_style="cyan"))
         
         # Show failed tracks if any
         if self.failed > 0 and self.failed_tracks:
-            print(f"\n❌ Failed Downloads ({self.failed}):")
-            print("─" * 70)
+            self.console.print()
+            self.console.print(f"[red]❌ Failed Downloads ({self.failed}):[/red]")
+            self.console.rule(style="red")
             for i, track in enumerate(self.failed_tracks, 1):
-                print(f"  {i:2d}. {track}")
-            print()
-        
-        print()
+                self.console.print(f"  {i:2d}. {track}")
+            self.console.print()
     
     @staticmethod
     def _format_time(seconds: float) -> str:

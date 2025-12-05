@@ -9,7 +9,6 @@ import sys
 import click
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
 import logging
 
 # Add src to path
@@ -268,7 +267,9 @@ def main(playlist, track, album, song, list_albuns, retry_failed, format, qualit
         source_status = {}
         for source in available_sources:
             source_status[source] = "ready"
-        display.print_source_info(source_status)
+        display.print_source_info(available_sources)
+        
+        display.start_progress()
         
         import time
         start_time = time.time()
@@ -306,6 +307,7 @@ def main(playlist, track, album, song, list_albuns, retry_failed, format, qualit
         
         # Print final summary
         elapsed_time = time.time() - start_time
+        display.stop_progress()
         display.print_summary(elapsed_time)
         
         # Save failed tracks to JSON for retry functionality (overwrites previous run)
@@ -536,6 +538,8 @@ def download_by_song_name(song_query: str, config: dict):
         available_sources = multi_downloader.get_available_sources()
         display.print_source_info(available_sources)
         
+        display.start_progress()
+        
         # Format track data
         track = spotify_client.get_track(track_url)
         
@@ -545,6 +549,7 @@ def download_by_song_name(song_query: str, config: dict):
         result = download_track(track, multi_downloader, metadata_embedder, 0, 1, 1, display, start_time)
         
         elapsed = time.time() - start_time
+        display.stop_progress()
         display.print_summary(elapsed)
         
         if result[0]:
@@ -729,6 +734,8 @@ def retry_failed_downloads(config: dict):
         available_sources = multi_downloader.get_available_sources()
         display.print_source_info(available_sources)
         
+        display.start_progress()
+        
         import time
         start_time = time.time()
         
@@ -750,6 +757,7 @@ def retry_failed_downloads(config: dict):
                 logger.error(f"Retry failed for {track_info.get('name')}: {e}")
         
         elapsed = time.time() - start_time
+        display.stop_progress()
         display.print_summary(elapsed)
         
         # Update failed log with new format

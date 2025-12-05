@@ -16,7 +16,7 @@ depends=(
     'python-mutagen'
     'python-pydub'
     'python-requests'
-    'python-tqdm'
+    'python-rich'
     'python-yaml'
 )
 makedepends=('python-setuptools' 'python-build' 'python-installer' 'python-wheel' 'python-pip')
