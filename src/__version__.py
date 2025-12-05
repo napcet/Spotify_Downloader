@@ -24,7 +24,7 @@ __url__ = "https://github.com/MokshitBindal/Spotify_Downloader"
 VERSION_BANNER = f"""
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
-║        {__title__} v{__version__:<18}║
+║        {__title__} v{__version__:<18}                 ║
 ║        Download playlists in various formats          ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
