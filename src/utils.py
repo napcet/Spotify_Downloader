@@ -157,25 +157,25 @@ def setup_logging(config: Dict) -> logging.Logger:
 
 def get_project_metadata(field: str, pyproject_path: str = 'pyproject.toml') -> str:
     """
-    Lê um campo do bloco [project] do pyproject.toml.
+    Read a field from the [project] block in pyproject.toml.
     Args:
-        field: Nome do campo (ex: 'version', 'name')
-        pyproject_path: Caminho para o pyproject.toml
+        field: Field name (e.g., 'version', 'name')
+        pyproject_path: Path to pyproject.toml
     Returns:
-        Valor do campo ou string vazia se não encontrado
+        Field value or empty string if not found
     """
     try:
         with open(pyproject_path, 'r') as f:
             content = f.read()
-        # Encontrar o bloco [project]
+        # Find the [project] block
         match = re.search(r'\[project\](.*?)(\n\[|$)', content, re.DOTALL)
         if match:
             block = match.group(1)
             field_match = re.search(rf'{field}\s*=\s*["\']([^"\']+)["\']', block)
             if field_match:
                 return field_match.group(1)
-    except Exception:
-        pass
+    except Exception as e:
+        logging.exception(f"Error reading project metadata field '{field}' from {pyproject_path}")
     return ''
 
 def format_duration(milliseconds: int) -> str:
@@ -251,12 +251,12 @@ def check_ffmpeg() -> bool:
 
 
 def print_banner():
-    """Exibe banner clássico com versão dinâmica."""
+    """Display classic banner with dynamic version."""
     version = get_project_metadata('version') or 'dev'
     banner = f"""
     ╔═══════════════════════════════════════════════════════╗
     ║                                                       ║
-    ║        Spotify Music Downloader v{version:<7}              ║
+    ║        Spotify Music Downloader v{version:<6}               ║
     ║        Download playlists in various formats          ║
     ║                                                       ║
     ╚═══════════════════════════════════════════════════════╝
@@ -264,10 +264,10 @@ def print_banner():
     print(banner)
 
 def print_minimal_banner():
-    """Exibe banner minimalista e moderno com versão dinâmica."""
+    """Display minimalist and modern banner with dynamic version."""
     version = get_project_metadata('version') or 'dev'
     name = get_project_metadata('name') or 'Spotify Music Downloader'
-    # ANSI cores: verde para nome, cinza para versão
+    # ANSI colors: green for name, gray for version
     GREEN = '\033[92m'
     GRAY = '\033[90m'
     RESET = '\033[0m'
