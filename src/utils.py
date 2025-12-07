@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Dict, Optional
 from dotenv import load_dotenv
 import sys
+import re
 
 
 def load_config(config_path: str = 'config/config.yaml') -> Dict:
@@ -153,6 +154,30 @@ def setup_logging(config: Dict) -> logging.Logger:
     return logger
 
 
+
+def get_project_metadata(field: str, pyproject_path: str = 'pyproject.toml') -> str:
+    """
+    Lê um campo do bloco [project] do pyproject.toml.
+    Args:
+        field: Nome do campo (ex: 'version', 'name')
+        pyproject_path: Caminho para o pyproject.toml
+    Returns:
+        Valor do campo ou string vazia se não encontrado
+    """
+    try:
+        with open(pyproject_path, 'r') as f:
+            content = f.read()
+        # Encontrar o bloco [project]
+        match = re.search(r'\[project\](.*?)(\n\[|$)', content, re.DOTALL)
+        if match:
+            block = match.group(1)
+            field_match = re.search(rf'{field}\s*=\s*["\']([^"\']+)["\']', block)
+            if field_match:
+                return field_match.group(1)
+    except Exception:
+        pass
+    return ''
+
 def format_duration(milliseconds: int) -> str:
     """
     Format duration from milliseconds to MM:SS format.
@@ -226,16 +251,28 @@ def check_ffmpeg() -> bool:
 
 
 def print_banner():
-    """Print application banner."""
-    banner = """
+    """Exibe banner clássico com versão dinâmica."""
+    version = get_project_metadata('version') or 'dev'
+    banner = f"""
     ╔═══════════════════════════════════════════════════════╗
     ║                                                       ║
-    ║        Spotify Music Downloader v1.0.0                ║
-    ║        Download playlists in various formats         ║
+    ║        Spotify Music Downloader v{version:<7}              ║
+    ║        Download playlists in various formats          ║
     ║                                                       ║
     ╚═══════════════════════════════════════════════════════╝
     """
     print(banner)
+
+def print_minimal_banner():
+    """Exibe banner minimalista e moderno com versão dinâmica."""
+    version = get_project_metadata('version') or 'dev'
+    name = get_project_metadata('name') or 'Spotify Music Downloader'
+    # ANSI cores: verde para nome, cinza para versão
+    GREEN = '\033[92m'
+    GRAY = '\033[90m'
+    RESET = '\033[0m'
+    print(f"{GREEN}{name}{RESET} {GRAY}v{version}{RESET}")
+    print(f"{GRAY}Download playlists in various formats{RESET}")
 
 
 class ProgressTracker:
